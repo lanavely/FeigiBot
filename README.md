@@ -1,5 +1,5 @@
 # Feigi Bot
-Vk bot to get the schedule of Chuvash State University pairs
+Vk bot to get the schedule of Chuvash State University сouples
 
 <img src="images/feigibot.png">
 
