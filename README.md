@@ -7,7 +7,7 @@ Vk bot to get the schedule of Chuvash State University
 ## Contributing
 
 For information security purposes, some configuration files have been added to the .gitignor, e.g. group token from the configuration directory.
-To start programming, you need to add the files **database.py** and **group.py** to the root directory **/config**.
+To start programming, you need to add the files **database.py** and **group.py** to the directory **/config**.
 
 database.py - information for connection to the database.
 ```py
