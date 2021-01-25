@@ -11,7 +11,7 @@ def get_schedule(group: str, scheduleDate: date):
     td = html.find('td', attrs={'id': 'td' + scheduleDate.strftime('%Y%m%d') + 'g' + group})
     if td:
         for i in td.findAll('tr'):
-            res.append(i.text + '\n')
+            res.append(i.text + '\n\n')
     else:
         return 'Отсутсвует расписание на ' + scheduleDate.strftime('%d.%m.%Y')
     return ''.join(res)
