@@ -6,7 +6,7 @@ Vk bot to get the schedule of Chuvash State University
 
 ## Contributing
 
-For testing this bot, you need to add to your system the following environment variables:
+Before using this bot you need to add to your system the following environment variables:
 
 ```
 FEIGI_DB_NAME
