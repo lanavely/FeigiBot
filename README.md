@@ -17,5 +17,3 @@ FEIGI_DB_PORT
 FEIGI_VK_TOKEN
 FEIGI_VK_GROUP_ID
 ```
-
-For testing purposes you can make your own vk group and fill the group's id and token
