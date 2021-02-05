@@ -1,5 +1,5 @@
 from vkwave.bots import SimpleLongPollBot
-from data.peer import Peer
+from data.peer import *
 from parsing.parsing import get_schedule
 from helpers import data_time_parser
 from config import group as group_config
@@ -7,8 +7,9 @@ from config import group as group_config
 bot = SimpleLongPollBot(tokens=group_config.TOKEN,
                         group_id=group_config.GROUP_ID)
 
-@bot.message_handler(bot.command_filter(["конфигурация", "конфиг", "к"]))
-async def handle_config(event: bot.SimpleBotEvent) -> str:
+
+@bot.message_handler(bot.command_filter(["к"]))
+async def handle_config(event: bot.SimpleBotEvent):
     """Write to the database the schedule link  for the peer"""
     try:
         received_message = event.object.object.message
@@ -25,9 +26,9 @@ async def handle_config(event: bot.SimpleBotEvent) -> str:
     except Exception as e:
         await event.answer("Произошла ошибка, убедитесь в правильности переданных параметров(")
         print(e)
-    
 
-@bot.message_handler(bot.command_filter(["расписание", "расп", "р"]))
+
+@bot.message_handler(bot.command_filter(["р"]))
 async def handle_schedule(event: bot.SimpleBotEvent):
     """Parse and sends the schedule"""
     try:
@@ -45,5 +46,72 @@ async def handle_schedule(event: bot.SimpleBotEvent):
     except Exception as e:
         await event.answer("Произошла ошибка, убедитесь в правильности переданных параметров(")
         print(e)
+
+
+@bot.message_handler(bot.command_filter("", "#"))
+async def handle_hashtag(event: bot.SimpleBotEvent):
+    try:
+        message = event.object.object.message
+        text = message.text[1:].strip().lower()
+        if text == "бесплатно":
+            await event.answer("За деньги можно и бесплатно поработать")
+            return
+        if text == "вебинары":
+            await event.answer("https://tt.chuvsu.ru/webinar")
+            return
+        if text.startswith("что по"):
+            await event.answer(
+                f'Често говоря сам не знаю что по {message.split()[2].replace("?", "")}, но я бы лучше этого не делал и повалялся на диване')
+            return
+        saved_message = SavedMassagesInText.get_or_none(peer_id=message.peer_id, hashtag=text)
+        # atts = Attachments.select().where(peer_id=message.peer_id, hashtag=text)
+        if saved_message:
+            await event.answer(saved_message.text)
+        else:
+            await event.answer("На этот хештег ничего нету(")
+    except Exception as e:
+        await event.answer("Уупс, что пошло не так, убедитесь в правильности переданных параметров(")
+        print(e)
+
+
+@bot.message_handler(bot.command_filter("save", "/"))
+async def handle_save(event: bot.SimpleBotEvent):
+    try:
+        message = event.object.object.message
+        if not message.reply_message:
+            await event.answer("Уупс, неправильные параметры")
+            return
+        hashtag = message.text.replace("/save ", "").strip().lower()[:100]
+        # attachments = message.reply_message.attachments
+        if not hashtag:
+            await event.answer("Нету ключа для сохранения")
+            return
+        saved_message = SavedMassagesInText.get_or_none(peer_id=message.peer_id, hashtag=hashtag)
+        if saved_message:
+            saved_message.message_id = message.reply_message.conversation_message_id
+            saved_message.author_id = message.from_id
+            saved_message.text = message.reply_message.text
+            # Attachments.delete().where(peer_id=message.peer_id, hashtag=hashtag)
+            # att_str = get_attachments_in_str(attachments)
+            # for att in att_str:
+            #     Attachments.create(peer_id=message.peer_id, hashtag=hashtag, attachment=att)
+
+            saved_message.save()
+            return
+        else:
+            SavedMassagesInText.create(peer_id=message.peer_id,
+                                 hashtag=hashtag,
+                                 message_id=message.reply_message.conversation_message_id,
+                                 author_id=message.from_id,
+                                 text = message.reply_message.text)
+            # att_str = get_attachments_in_str(attachments)
+            # for att in att_str:
+            #     Attachments.create(peer_id=message.peer_id, hashtag=hashtag, attachment=att)
+
+            return
+    except Exception as e:
+        await event.answer("Уупс, что пошло не так, убедитесь в правильности переданных параметров(")
+        print(e)
+
 
 bot.run_forever()
